@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Pair[] requestParams;
 
+    String[] comments={"잘 하고 있어요!", "아직 됀찮아요!", "조금 위험해요!", "조심하세요!!", "퇴사가 당신의 곁에..", "퇴사!"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +103,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }, 4000);
                 } catch (IllegalArgumentException e){
-                    me = new Student();
-                    requestRID = 0;
-                    updatePreferences();
-                    updateViews();
-                    Toast toast = Toast.makeText(getApplicationContext(), "아직 승인되지 않은 학생입니다.", Toast.LENGTH_SHORT);
-                    toast.show();
+                    if(requestRID != 0) {
+                        updatePreferences();
+                        updateViews();
+                        Toast toast = Toast.makeText(getApplicationContext(), "아직 승인되지 않은 학생입니다.", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                    else{
+                        me = new Student();
+                        updatePreferences();
+                        updateViews();
+                    }
                 }
 
                 try {
@@ -140,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         settingsButton.setOnClickListener(this);
         infoChangeButton.setOnClickListener(this);
 
-        if(!BackgroundService.isRunning) {
+        if(me.getID() != 0 && !BackgroundService.isRunning) {
             Intent it = new Intent(getApplicationContext(), BackgroundService.class);
             it.putExtra("ID", me.getID());
             startService(it);
@@ -158,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         profile.setText("학번: "+me.getID()+"\n이름: "+me.getName()+"\n건물: "+me.getBuilding()+"\n호실: "+me.getRoom()+"호");
         statusView.setText("Current status: 점호불참 "+me.getLatecnt()+"회");
+        commentView.setText(comments[Math.min(me.latecnt, 5)]);
     }
 
     @Override
@@ -170,6 +178,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
         else if(view.getId() == R.id.settingsButton){
+            requestRID = 0;
+            updatePreferences();
             Intent it = new Intent(this, SettingsActivity.class);
             startActivityForResult(it, 1);
         }
@@ -206,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor.putString("building", me.getBuilding());
         editor.putInt("room", me.getRoom());
         editor.putInt("RID", requestRID);
+        editor.putInt("latecnt", me.getLatecnt());
         editor.apply();
-        Toast toast = Toast.makeText(this, "변경 사항 저장", Toast.LENGTH_LONG);
-        toast.show();
+        //Toast.makeText(this, "변경 사항 저장", Toast.LENGTH_LONG).show();
     }
 }

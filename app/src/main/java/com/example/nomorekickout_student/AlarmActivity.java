@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -90,22 +91,16 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         if(alertType.equals("ring")||alertType.equals("both")) {
             if (musicName.equals("기본")) {
                 mediaPlayer = MediaPlayer.create(this, R.raw.pirate);
-                mediaPlayer.setLooping(false);
-                mediaPlayer.start();
                 Log.v("asdf", "asfasd");
             } else {
-                try {
                     Uri myUri = Uri.parse(musicName);
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-                    mediaPlayer.setDataSource(getApplicationContext(), myUri);
-                    mediaPlayer.prepare();
-                    mediaPlayer.setLooping(false);
-                    mediaPlayer.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    mediaPlayer = MediaPlayer.create(this, myUri);
             }
+            //float log1=1.f - (float)(Math.log(100-volumeVal)/Math.log(100));
+            //mediaPlayer.setVolume(log1, log1);
+            mediaPlayer.setVolume(((float)volumeVal)/100, ((float)volumeVal)/100);
+            mediaPlayer.setLooping(false);
+            mediaPlayer.start();
         }
         if(alertType.equals("vibrate")||alertType.equals("both")){
             vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
