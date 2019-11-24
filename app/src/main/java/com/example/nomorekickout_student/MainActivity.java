@@ -17,6 +17,9 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
+import java.net.URL;
+import java.net.URLEncoder;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     TextView profile, statusView, commentView;
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Student me;
 
     static ServerManager serverManager;
+
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -36,10 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         settingsButton = findViewById(R.id.settingsButton);
         infoChangeButton = findViewById(R.id.infoChangeButton);
 
-        serverManager = new ServerManager("http://34.84.59.141"){
-
+        serverManager = new ServerManager("http://34.84.59.141", new ServerManager.OnResult() {
             @Override
-            protected void onPostExecute(Pair<String, String> s) {
+            public void handleResult(Pair<String, String> s) {
                 if(s.first.equals("addRequest"));
                 else if(s.first.equals("getStudentInfo")){
                     try{
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } catch(Exception e){}
                 }
             }
-        };
+        });
 
         me = new Student();
 
@@ -103,17 +106,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String newBuilding = data.getStringExtra("building");
             int newRoom = data.getIntExtra("room", 0);*/
             //updateViews();
-            serverManager.execute(
-                    Pair.create("\"qtype\"", "addRequest"),
-                    Pair.create("\"ID\"", ""+data.getIntExtra("ID", 0)),
-                    Pair.create("\"building\"", data.getStringExtra("building")),
-                    Pair.create("\"room\"", ""+data.getIntExtra("room", 0)),
-                    Pair.create("\"name\"", data.getStringExtra("name")),
-                    Pair.create("\"noAlert\"", ""+data.getIntExtra("alertSetting", 0)),
-                    Pair.create("\"requestType\"", ""+(me.getName().equals("") ? 0:1))
-            );
-            Toast toast = Toast.makeText(this, "요청이 전송되었습니다.", Toast.LENGTH_LONG);
-            toast.show();
+            try {
+                serverManager.execute(
+                        Pair.create("qtype", "addRequest"),
+                        Pair.create("ID", "" + data.getIntExtra("ID", 0)),
+                        Pair.create("building", data.getStringExtra("building")),
+                        Pair.create("room", "" + data.getIntExtra("room", 0)),
+                        Pair.create("name", data.getStringExtra("name")),
+                        Pair.create("noAlert", "" + data.getIntExtra("alertSetting", 0)),
+                        Pair.create("requestType", "" + (me.getName().equals("") ? 0 : 1))
+                );
+                Toast toast = Toast.makeText(this, "요청이 전송되었습니다.", Toast.LENGTH_LONG);
+                toast.show();
+            }
+            catch(Exception e){
+                Toast toast = Toast.makeText(this, "요철 실패!", Toast.LENGTH_LONG);
+                toast.show();
+            }
         }
     }
 

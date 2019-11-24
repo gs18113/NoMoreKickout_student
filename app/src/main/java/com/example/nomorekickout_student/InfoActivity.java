@@ -47,11 +47,11 @@ public class InfoActivity extends AppCompatActivity implements View.OnClickListe
         editBuilding.setText(it.getStringExtra("building"));
         editRoom.setText(""+it.getIntExtra("room", 0));
 
-        if(it.getStringExtra("alertSetting").equals("yes")){
-            yesAlert.setChecked(true);
+        if(it.getStringExtra("alertSetting") != null && it.getStringExtra("alertSetting").equals("no")){
+            noAlert.setChecked(true);
         }
         else{
-            noAlert.setChecked(true);
+            yesAlert.setChecked(true);
         }
 
         if(it.getIntExtra("ID", 0) == 0) isFirst = true;
