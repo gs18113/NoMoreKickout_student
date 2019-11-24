@@ -3,6 +3,7 @@ package com.example.nomorekickout_student;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -29,6 +31,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     LinearLayout okView;
     TextView currentTime;
+    Vibrator vibrator;
 
     static class MHandler extends Handler{
         TextView currTime;
@@ -104,18 +107,25 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         }
+        if(alertType.equals("vibrate")||alertType.equals("both")){
+            vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+            long[] pattern = {500, 500};
+            vibrator.vibrate(pattern, 0);
+        }
 
     }
 
     @Override
     public void onClick(View view) {
         if(mediaPlayer != null) mediaPlayer.stop();
+        if(vibrator != null) vibrator.cancel();
         finish();
     }
 
     @Override
     public void onBackPressed() {
         if(mediaPlayer != null) mediaPlayer.stop();
+        if(vibrator != null) vibrator.cancel();
         finish();
     }
 }

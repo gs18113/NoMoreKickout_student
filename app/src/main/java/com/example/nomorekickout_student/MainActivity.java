@@ -81,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Student info = gson.fromJson(s.second, Student.class);
                         if(info == null) throw new NullPointerException();
                         me = info;
-                        Log.v("asdfasdf", "adsfasdf");
                         updatePreferences();
                         updateViews();
                         return;
@@ -102,6 +101,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }, 4000);
                 } catch (IllegalArgumentException e){
+                    me = new Student();
+                    requestRID = 0;
+                    updatePreferences();
+                    updateViews();
                     Toast toast = Toast.makeText(getApplicationContext(), "아직 승인되지 않은 학생입니다.", Toast.LENGTH_SHORT);
                     toast.show();
                 }
