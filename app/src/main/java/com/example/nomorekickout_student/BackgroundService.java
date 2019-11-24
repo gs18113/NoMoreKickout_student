@@ -12,6 +12,8 @@ public class BackgroundService extends Service {
     ServerManager serverManager;
     int ID;
 
+    static boolean isRunning;
+
     public BackgroundService() {
         serverManager = new ServerManager("http://34.84.59.141", new ServerManager.OnResult() {
             @Override
@@ -20,8 +22,13 @@ public class BackgroundService extends Service {
                     if (s.first.equals("getAlarm")) {
                         if (s.second.equals("1")) {
                             Intent intent = new Intent(getApplicationContext(), AlarmActivity.class);
-                            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
+                            serverManager.execute(
+                                    Pair.create("qtype", "setAlarm"),
+                                    Pair.create("ID", ID+""),
+                                    Pair.create("alarm", "0")
+                            );
                         }
                     }
                 } catch (NullPointerException e){
@@ -61,12 +68,14 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.ID = intent.getIntExtra("ID", 0);
+        isRunning = true;
         new WatchThread().start();
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
+        isRunning = false;
         super.onDestroy();
     }
 

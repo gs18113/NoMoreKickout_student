@@ -1,5 +1,6 @@
 package com.example.nomorekickout_student;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
@@ -7,13 +8,18 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class AlarmActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -24,6 +30,24 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
     LinearLayout okView;
     TextView currentTime;
 
+    static class MHandler extends Handler{
+        TextView currTime;
+        public MHandler(TextView currTime) {
+            super();
+            this.currTime = currTime;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            Bundle bundle = msg.getData();
+            String time = bundle.getString("time");
+            currTime.setText(time);
+            super.handleMessage(msg);
+        }
+    }
+
+    MHandler mHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,12 +56,19 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         okView = findViewById(R.id.okView);
         currentTime = findViewById(R.id.currentTime);
 
+        mHandler = new MHandler(currentTime);
+
         new Thread(){
             @Override
             public void run() {
                 while(true) {
                     Date nowTime = Calendar.getInstance().getTime();
-                    currentTime.setText(nowTime.getTime() + "");
+                    SimpleDateFormat formatter = new SimpleDateFormat ( "HH:mm:ss", Locale.KOREA );
+                    Message msg = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("time", formatter.format(nowTime)+"");
+                    msg.setData(bundle);
+                    mHandler.sendMessage(msg);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -58,6 +89,7 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
                 mediaPlayer = MediaPlayer.create(this, R.raw.pirate);
                 mediaPlayer.setLooping(false);
                 mediaPlayer.start();
+                Log.v("asdf", "asfasd");
             } else {
                 try {
                     Uri myUri = Uri.parse(musicName);
@@ -77,7 +109,13 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        mediaPlayer.stop();
+        if(mediaPlayer != null) mediaPlayer.stop();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mediaPlayer != null) mediaPlayer.stop();
         finish();
     }
 }
