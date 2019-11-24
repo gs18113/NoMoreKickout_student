@@ -4,9 +4,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
@@ -28,22 +30,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     static ServerManager serverManager;
 
+    int requestRID;
 
-    @SuppressLint("StaticFieldLeak")
+    Activity thisActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        thisActivity = this;
         profile = findViewById(R.id.profile);
         statusView = findViewById(R.id.statusView);
         commentView = findViewById(R.id.commentView);
         settingsButton = findViewById(R.id.settingsButton);
         infoChangeButton = findViewById(R.id.infoChangeButton);
+        me = new Student();
+
+        updateViews();
 
         serverManager = new ServerManager("http://34.84.59.141", new ServerManager.OnResult() {
             @Override
             public void handleResult(Pair<String, String> s) {
-                if(s.first.equals("addRequest"));
+                if(s.first.equals("addRequest")){
+                    requestRID = Integer.parseInt(s.second);
+                }
                 else if(s.first.equals("getStudentInfo")){
                     try{
                         Gson gson = new Gson();
@@ -52,20 +62,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         updateViews();
                     } catch(Exception e){}
                 }
+                else if(s.first.equals("viewRequestExists")){
+                    if(s.second.equals("false")) {
+                        Log.v("asdf", "request exists");
+                        Intent it = new Intent(thisActivity, InfoActivity.class);
+                        it.putExtra("ID", me.getID());
+                        it.putExtra("name", me.getName());
+                        it.putExtra("building", me.getBuilding());
+                        it.putExtra("room", me.getRoom());
+                        startActivityForResult(it, 0);
+                    }
+                    else{
+                        Toast toast = Toast.makeText(thisActivity, "아직 기존 요청이 처리되지 않았습니다. 요청이 처리될 때까지 기다려 주세요.", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                }
             }
         });
 
-        me = new Student();
 
         serverManager.execute(
                 Pair.create("qtype", "getStudentInfo"),
                 Pair.create("ID", ""+me.getID())
         );
-        updateViews();
 
         settingsButton.setOnClickListener(this);
         infoChangeButton.setOnClickListener(this);
 
+        Intent it = new Intent(getApplicationContext(), BackgroundService.class);
+        it.putExtra("ID", me.getID());
+        startService(it);
 
     }
 
@@ -84,12 +110,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         if(view.getId() == R.id.infoChangeButton) {
-            Intent it = new Intent(this, InfoActivity.class);
-            it.putExtra("ID", me.getID());
-            it.putExtra("name", me.getName());
-            it.putExtra("building", me.getBuilding());
-            it.putExtra("room", me.getRoom());
-            startActivityForResult(it, 0);
+            serverManager.execute(
+                Pair.create("qtype", "viewRequestExists"),
+                Pair.create("RID", ""+requestRID)
+            );
+
         }
         else if(view.getId() == R.id.settingsButton){
             Intent it = new Intent(this, SettingsActivity.class);
