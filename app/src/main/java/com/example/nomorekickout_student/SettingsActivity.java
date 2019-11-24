@@ -54,9 +54,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         volume.setOnSeekBarChangeListener(this);
 
         SharedPreferences pref = getSharedPreferences("settings", MODE_PRIVATE);
-        alertType = pref.getString("alertType", "");
+        alertType = pref.getString("alertType", "ring");
         volumeVal = pref.getInt("volume", 30);
-        musicName = pref.getString("musicName", "");
+        musicName = pref.getString("musicName", "기본");
 
         if(alertType.equals("vibrate")){
             alertVibrate.setChecked(true);
@@ -68,11 +68,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         volume.setProgress(volumeVal);
 
-        if(musicName.equals("")) {
-            musicNameView.setText("기본");
-        } else{
-            musicNameView.setText(musicName);
-        }
+        musicNameView.setText(musicName);
     }
 
     @Override
@@ -93,7 +89,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 else if(radioId == R.id.alertBoth) editor.putString("alertType", "both");
 
                 editor.putInt("volume", volume.getProgress());
-                editor.putString("musicName", musicNameView.getText().toString());
+                editor.putString("musicName", musicName);
                 editor.apply();
                 setResult(RESULT_OK);
                 finish();

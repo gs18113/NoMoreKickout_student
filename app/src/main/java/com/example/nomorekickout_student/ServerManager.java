@@ -83,7 +83,7 @@ public class ServerManager{
                 localDataOutputStream.close();
                 in.close();
                 con.disconnect();
-                return Pair.create(pairs[0].first, stringBuilder.toString());
+                return Pair.create(pairs[0].second, stringBuilder.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         serverManager = new ServerManager("http://34.84.59.141", new ServerManager.OnResult() {
             @Override
             public void handleResult(Pair<String, String> s) {
+                Log.v("AAAA", s.first);
                 if(s.first.equals("addRequest")){
                     requestRID = Integer.parseInt(s.second);
                 }
@@ -63,8 +64,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     } catch(Exception e){}
                 }
                 else if(s.first.equals("viewRequestExists")){
+                    Log.v("adsf", "adsfasd");
                     if(s.second.equals("false")) {
-                        Log.v("asdf", "request exists");
+                        Log.v("adsf", "qwerqwe");
                         Intent it = new Intent(thisActivity, InfoActivity.class);
                         it.putExtra("ID", me.getID());
                         it.putExtra("name", me.getName());
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         startActivityForResult(it, 0);
                     }
                     else{
-                        Toast toast = Toast.makeText(thisActivity, "아직 기존 요청이 처리되지 않았습니다. 요청이 처리될 때까지 기다려 주세요.", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), "아직 기존 요청이 처리되지 않았습니다. 요청이 처리될 때까지 기다려 주세요.", Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
