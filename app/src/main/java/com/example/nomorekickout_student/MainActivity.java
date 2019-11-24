@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     if(s.first.equals("addRequest")){
                         requestRID = Integer.parseInt(s.second);
+                        updatePreferences();
+                        Toast toast = Toast.makeText(getApplicationContext(), "요청이 전송되었습니다.", Toast.LENGTH_LONG);
+                        toast.show();
                         return;
                     }
                 } catch (Exception e){
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try{
                     if(s.first.equals("getStudentInfo")){
                         Gson gson = new Gson();
+                        if(s.second.equals("")) throw new IllegalArgumentException();
                         Student info = gson.fromJson(s.second, Student.class);
                         if(info == null) throw new NullPointerException();
                         me = info;
@@ -97,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             );
                         }
                     }, 4000);
-                } catch (Exception e){
+                } catch (IllegalArgumentException e){
                     Toast toast = Toast.makeText(getApplicationContext(), "아직 승인되지 않은 학생입니다.", Toast.LENGTH_SHORT);
                     toast.show();
                 }
@@ -172,29 +176,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 0 && resultCode == RESULT_OK) {
-            /*int newID = data.getIntExtra("ID", 0);
-            String newName = data.getStringExtra("name");
-            String newBuilding = data.getStringExtra("building");
-            int newRoom = data.getIntExtra("room", 0);*/
-            //updateViews();
-            try {
-                requestParams = new Pair[]{
-                        Pair.create("qtype", "addRequest"),
-                        Pair.create("ID", "" + data.getIntExtra("ID", 0)),
-                        Pair.create("building", data.getStringExtra("building")),
-                        Pair.create("room", "" + data.getIntExtra("room", 0)),
-                        Pair.create("name", data.getStringExtra("name")),
-                        Pair.create("noAlert", "" + data.getIntExtra("alertSetting", 0)),
-                        Pair.create("requestType", "" + (me.getName().equals("") ? 0 : 1))
-                };
-                serverManager.execute(requestParams);
-                Toast toast = Toast.makeText(this, "요청이 전송되었습니다.", Toast.LENGTH_LONG);
-                toast.show();
-            }
-            catch(Exception e){
-                Toast toast = Toast.makeText(this, "요철 실패!", Toast.LENGTH_LONG);
-                toast.show();
-            }
+            requestParams = new Pair[]{
+                    Pair.create("qtype", "addRequest"),
+                    Pair.create("ID", "" + data.getIntExtra("ID", 0)),
+                    Pair.create("building", data.getStringExtra("building")),
+                    Pair.create("room", "" + data.getIntExtra("room", 0)),
+                    Pair.create("name", data.getStringExtra("name")),
+                    Pair.create("noAlert", "" + data.getIntExtra("alertSetting", 0)),
+                    Pair.create("requestType", "" + (me.getName().equals("") ? 0 : 1))
+            };
+            serverManager.execute(requestParams);
+            me.ID = data.getIntExtra("ID", 0);
+            me.name = data.getStringExtra("name");
+            me.building = data.getStringExtra("building");
+            me.room = data.getIntExtra("room", 0);
+            updatePreferences();
+            updateViews();
         }
     }
 
@@ -205,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editor.putString("name", me.getName());
         editor.putString("building", me.getBuilding());
         editor.putInt("room", me.getRoom());
+        editor.putInt("RID", requestRID);
         editor.apply();
         Toast toast = Toast.makeText(this, "변경 사항 저장", Toast.LENGTH_LONG);
         toast.show();
